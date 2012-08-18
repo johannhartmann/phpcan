@@ -46,7 +46,12 @@ static zend_object_value server_router_ctor(zend_class_entry *ce TSRMLS_DC)
 
     router = ecalloc(1, sizeof(*router));
     zend_object_std_init(&router->std, ce TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
+    zend_hash_copy(router->std.properties, &(ce->default_properties),
+        (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
+#else
     object_properties_init(&router->std, ce);
+#endif
     router->pos = -1;
     router->routes = NULL;
     router->method_routes = NULL;

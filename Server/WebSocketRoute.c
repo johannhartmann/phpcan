@@ -33,7 +33,12 @@ static zend_object_value server_websocket_route_ctor(zend_class_entry *ce TSRMLS
     
     route = ecalloc(1, sizeof(*route));
     zend_object_std_init(&route->std, ce TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
+    zend_hash_copy(route->std.properties, &(ce->default_properties),
+        (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
+#else
     object_properties_init(&route->std, ce);
+#endif
     route->handler = NULL;
     route->methods = PHP_CAN_SERVER_ROUTE_METHOD_GET;
     route->regexp = NULL;

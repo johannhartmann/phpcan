@@ -49,7 +49,12 @@ static zend_object_value server_ctor(zend_class_entry *ce TSRMLS_DC)
     server->logfile = NULL;
     server->router = NULL;
     zend_object_std_init(&server->std, ce TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
+    zend_hash_copy(server->std.properties, &(ce->default_properties),
+        (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
+#else
     object_properties_init(&server->std, ce);
+#endif
     retval.handle = zend_objects_store_put(server,
             (zend_objects_store_dtor_t)zend_objects_destroy_object,
             server_dtor,
