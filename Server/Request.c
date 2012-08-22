@@ -40,12 +40,19 @@ static void server_request_dtor(void *object TSRMLS_DC);
 
 static zend_object_value server_request_ctor(zend_class_entry *ce TSRMLS_DC)
 {
+
     struct php_can_server_request *request;
     zend_object_value retval;
-
+#if PHP_VERSION_ID < 50399
+    zval *tmp;
+#endif
     request = ecalloc(1, sizeof(*request));
     zend_object_std_init(&request->std, ce TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
+    zend_hash_copy(request->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
+#else
     object_properties_init(&request->std, ce);
+#endif
     request->cookies = NULL;
     request->get = NULL;
     request->post = NULL;

@@ -17,6 +17,7 @@
 */
 
 #include "Server.h"
+#include "evhttp.h"
 
 zend_class_entry *ce_can_server_websocket_route;
 zend_class_entry *ce_can_server_websocket_ctx;
@@ -30,12 +31,13 @@ static zend_object_value server_websocket_route_ctor(zend_class_entry *ce TSRMLS
 {
     struct php_can_server_route *route;
     zend_object_value retval;
-    
+#if PHP_VERSION_ID < 50399
+    zval *tmp;
+#endif    
     route = ecalloc(1, sizeof(*route));
     zend_object_std_init(&route->std, ce TSRMLS_CC);
 #if PHP_VERSION_ID < 50399
-    zend_hash_copy(route->std.properties, &(ce->default_properties),
-        (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
+    zend_hash_copy(route->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
 #else
     object_properties_init(&route->std, ce);
 #endif
@@ -83,10 +85,16 @@ static zend_object_value server_websocket_ctx_ctor(zend_class_entry *ce TSRMLS_D
 {
     struct php_can_websocket_ctx *ctx;
     zend_object_value retval;
-
+#if PHP_VERSION_ID < 50399
+    zval *tmp;
+#endif
     ctx = ecalloc(1, sizeof(*ctx));
     zend_object_std_init(&ctx->std, ce TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
+    zend_hash_copy(ctx->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
+#else
     object_properties_init(&ctx->std, ce);
+#endif
     ctx->timeout = 360; // one hour by default
     ctx->evcon = NULL;
     ctx->req = NULL;

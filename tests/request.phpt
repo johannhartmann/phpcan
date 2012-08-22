@@ -6,7 +6,7 @@
 <?php
 function test($code, $expected, $meth = 'GET', $rHdrs = null, $headers = '')
 {
-    $str = '$s=new Can\Server("0.0.0.0", 45678);' . 
+    $str = '$s=new Can\Server("127.0.0.1", 45678);' . 
            '$s->start(new Can\Server\Router(array(' . 
            'new Can\Server\Route("/<uri>",' . 
            'function($r, $a) {' . 
@@ -17,7 +17,7 @@ function test($code, $expected, $meth = 'GET', $rHdrs = null, $headers = '')
            '$r->sendResponseChunk($m);} else return $m;}}' . 
            ',Can\Server\Route::METHOD_ALL))));';
     $cmd = sprintf($str, $code);
-    exec ($_SERVER['_'] . " -r '" . $cmd . "' >/dev/null &");
+    exec (isset($_SERVER['TEST_PHP_EXECUTABLE']) ? $_SERVER['TEST_PHP_EXECUTABLE'] : $_SERVER['_']. " -r '" . $cmd . "' >/dev/null &");
     sleep(1);
     
     $fp = stream_socket_client("tcp://127.0.0.1:45678", $errno, $errstr, 30);
